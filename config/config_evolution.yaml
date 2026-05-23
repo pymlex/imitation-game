@@ -1,0 +1,64 @@
+max_iterations: 100
+checkpoint_interval: 10
+log_level: INFO
+random_seed: 42
+diff_based_evolution: false
+max_code_length: 4000
+
+llm:
+  models:
+    - name: openai/gpt-oss-120b
+      api_base: https://api.zveno.ai/v1
+      api_key: ${OPENAI_API_KEY}
+      api_type: openai
+  temperature: 0.7
+  top_p: 0.95
+  max_tokens: 2048
+
+database:
+  population_size: 100
+  archive_size: 20
+  num_islands: 5
+  migration_interval: 50
+  migration_rate: 0.1
+  in_memory: true
+
+evaluator:
+  timeout: 3600
+  cascade_evaluation: false
+  parallel_evaluations: 1
+
+prompt:
+  system_message: You refine system prompts for Spanish literary essays.
+
+operators:
+  mutation:
+    type: llm
+    llm_model: openai/gpt-oss-120b
+    prompt_template: |
+      You improve a system prompt used by Qwen to write Spanish literary essays.
+      The objective is to lower the mean logit of an AI-text detector on generated essays.
+      Make only small, local edits: replace one phrase, add one short constraint, or adjust tone.
+      Do not rewrite the whole prompt. Keep the prompt in Spanish.
+      Current prompt:
+      """{{program}}"""
+      Evasion score (higher is better): {{score:.4f}}.
+      Output only the revised prompt text.
+  crossover:
+    type: llm
+    llm_model: openai/gpt-oss-120b
+    probability: 0.5
+    prompt_template: |
+      Merge two Spanish essay system prompts with minimal changes.
+      Prompt A (score {{score_a:.4f}}): """{{program_a}}"""
+      Prompt B (score {{score_b:.4f}}): """{{program_b}}"""
+      Output only the merged prompt.
+
+selection:
+  type: tournament
+  tournament_size: 5
+
+evolution:
+  generations: 100
+  population_size: 100
+  elitism: 20

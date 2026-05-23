@@ -1,0 +1,23 @@
+from pathlib import Path
+
+from config_loader import load_env_file, require_env
+from data_topics import all_topics_path
+from pipeline_eval import run_full_dataset_eval
+
+
+if __name__ == "__main__":
+    load_env_file("evolution")
+    results_root = Path(require_env("RESULTS_DIR"))
+    experiment_dir = Path(require_env("EXPERIMENT_DIR"))
+
+    best_path = experiment_dir / "best_prompt_evolved.txt"
+    system_prompt = best_path.read_text(encoding="utf-8").strip()
+
+    out_dir, metrics = run_full_dataset_eval(
+        system_prompt=system_prompt,
+        topics_path=all_topics_path(),
+        label="final_full",
+        results_root=results_root,
+    )
+    print(out_dir)
+    print(metrics)
