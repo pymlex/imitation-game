@@ -29,4 +29,6 @@ results/openevolve_output/
 .idea/
 .vscode/
 checkpoint*/
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
 wandb/
