@@ -57,8 +57,3 @@ operators:
 selection:
   type: tournament
   tournament_size: 5
-
-evolution:
-  generations: 100
-  population_size: 100
-  elitism: 20

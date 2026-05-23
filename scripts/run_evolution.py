@@ -64,7 +64,7 @@ if __name__ == "__main__":
     from openevolve.config import load_config
 
     config = load_config(str(runtime_config))
-    generations = config.get("evolution", {}).get("generations", config.get("max_iterations", 100))
+    generations = config.max_iterations
 
     result = run_evolution(
         initial_program=str(initial_dst),
