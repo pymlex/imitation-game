@@ -54,6 +54,8 @@ Set `OPENAI_API_KEY` in `env/evolution.env` for [ZvenoAI](https://api.zveno.ai/v
 
 ## Topic splits
 
+Commands assume the current working directory is the repository root.
+
 ```bash
 python scripts/prepare_topics.py
 ```

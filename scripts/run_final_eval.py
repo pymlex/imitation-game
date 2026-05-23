@@ -1,4 +1,9 @@
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import add_project_root
 
 from config_loader import load_env_file, require_env
 from data_topics import all_topics_path
