@@ -204,7 +204,11 @@ $\Delta\bar{\ell} = +0.002$ between stages. The evolved prompt does not lower th
 | Mann–Whitney $U$ on logits | $U = 3.88 \times 10^6$ | 0.879 |
 | $\chi^2$ on human vs AI counts | 0.643 | 0.423 |
 
-Contingency table for classification, rows baseline then evolved, columns human then AI: $\begin{pmatrix} 10 & 2780 \\ 15 & 2775 \end{pmatrix}$. Neither test rejects the null of equal distributions at $\alpha = 0.05$.
+Contingency table for classification, rows baseline then evolved, columns human then AI: 
+
+$$\begin{pmatrix} 10 & 2780 \\ 15 & 2775 \end{pmatrix}$$
+
+Neither test rejects the null of equal distributions at $\alpha = 0.05$.
 
 ## Analysis
 
