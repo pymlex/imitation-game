@@ -1,4 +1,4 @@
-max_iterations: 100
+max_iterations: 50
 checkpoint_interval: 10
 log_level: INFO
 random_seed: 42
@@ -16,9 +16,10 @@ llm:
   max_tokens: 10000
 
 database:
-  population_size: 100
+  population_size: 200
   archive_size: 20
-  num_islands: 5
+  num_islands: 2
+  elite_selection_ratio: 0.1
   migration_interval: 50
   migration_rate: 0.1
   in_memory: true
@@ -30,6 +31,11 @@ evaluator:
 
 prompt:
   system_message: You refine system prompts for Spanish literary essays.
+
+evolution:
+  generations: 50
+  population_size: 200
+  elitism: 20
 
 operators:
   mutation:

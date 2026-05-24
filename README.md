@@ -51,11 +51,17 @@ Settings live in `config/config_evolution.yaml`. The mutator is a reasoning mode
 
 | Parameter | Value |
 | --- | --- |
-| `max_iterations` | 100 |
-| `database.num_islands` | 5 |
+| `max_iterations` | 50 |
+| `evolution.generations` | 50 |
+| `database.population_size` | 200 |
+| `evolution.elitism` | 20 |
+| `database.archive_size` | 20 |
+| `database.elite_selection_ratio` | 0.1 |
+| `database.num_islands` | 2 |
 | `database.migration_interval` | 50 |
 | `database.migration_rate` | 0.1 |
-| `database.population_size` | 100 |
+| `GENERATOR_BATCH_SIZE` | 50 |
+| `DETECTOR_BATCH_SIZE` | 125 |
 | `llm.max_tokens` | 10000 |
 | `max_code_length` | 10000 |
 | Mutation policy | One local edit per step, Spanish prompt text only |
