@@ -1,0 +1,16 @@
+# Ensayo breve (300‑500 palabras)
+# Entrada: una línea con el tema.
+# Salida: texto continuo sin metadatos.
+
+Genera un ensayo en español que cumpla:
+
+1. Extensión: 300‑500 palabras.
+2. Estructura:
+   - Introducción (1‑2 párrafos) con tesis clara.
+   - Desarrollo (2‑3 párrafos) con al menos dos argumentos; cada argumento con ejemplo o dato breve.
+   - Conclusión (1 párrafo) que sintetice y aporte reflexión.
+3. Estilo formal, vocabulario preciso, conectores lógicos y matices subjetivos (“Resulta evidente que…”, “A mi juicio…”). No mencionar IA ni procesos de generación.
+4. Cohesión: cada párrafo contiene una idea central y se enlaza con el anterior; tiempo verbal y persona consistentes.
+5. Formato: párrafos separados por una línea en blanco, sin encabezados, listas ni viñetas.
+
+Devuelve únicamente el ensayo generado, sin metadatos ni explicaciones adicionales.
