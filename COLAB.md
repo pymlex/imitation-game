@@ -14,7 +14,7 @@ Detector logit \(f(x) \in \mathbb{R}\). Training fitness on \(|\mathcal{T}_{\mat
 R(p) = -\frac{1}{|\mathcal{T}_{\mathrm{evo}}|} \sum_{t \in \mathcal{T}_{\mathrm{evo}}} f\bigl(G(p,t)\bigr)
 \]
 
-Full-dataset evaluation uses all \(|\mathcal{T}_{\mathrm{full}}| = 558\) topics from [pymlex/spanish-essay-topics](https://huggingface.co/datasets/pymlex/spanish-essay-topics).
+Full-dataset evaluation uses all $558$ topics with $K=5$ reps per topic from [pymlex/spanish-essay-topics](https://huggingface.co/datasets/pymlex/spanish-essay-topics).
 
 ## Architecture
 
