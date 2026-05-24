@@ -190,27 +190,31 @@ Significance output: `results/significance_tests.json`
 
 ## Results
 
-Reported metrics refer to $558 \times 5 = 2790$ samples per stage after `run_baseline_eval.py` and `run_final_eval.py`.
+Corpus evaluation on RTX 5090: `prompts/evaluation_no_ai.txt` versus `results/experiment/best_prompt_evolved.txt`, $558 \times 5 = 2790$ detector scores per stage. OpenEvolve on 250 topics reached $R = -6.642$ on the search set, 200 iterations in `results/experiment/evolution_summary.json`.
 
-| Stage | $n$ samples | $\bar{\ell}$ | $\sigma$ | Human rate | $n$ human |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Baseline | 2790 | — | — | — | — |
-| Evolved | 2790 | — | — | — | — |
+| Stage | $n$ | $\bar{\ell}$ | $\sigma$ | median | $n$ human | Human rate |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Evaluation baseline | 2790 | 6.939 | 1.600 | 7.315 | 10 | 0.36% |
+| Evolved | 2790 | 6.941 | 1.625 | 7.277 | 15 | 0.54% |
+
+$\Delta\bar{\ell} = +0.002$ between stages. The evolved prompt does not lower the mean logit on the full corpus under the neutral evaluation wording.
 
 | Test | Statistic | $p$-value |
 | --- | ---: | ---: |
-| Mann–Whitney $U$ on logits | — | — |
-| $\chi^2$ on human vs AI counts | — | — |
+| Mann–Whitney $U$ on logits | $U = 3.88 \times 10^6$ | 0.879 |
+| $\chi^2$ on human vs AI counts | 0.643 | 0.423 |
 
-Fill the table from `results/*/metrics.json` and `results/significance_tests.json` after a full rerun.
+Contingency table for classification, rows baseline then evolved, columns human then AI: $\begin{pmatrix} 10 & 2780 \\ 15 & 2775 \end{pmatrix}$. Neither test rejects the null of equal distributions at $\alpha = 0.05$.
 
 ## Analysis
 
-**Generator capacity.** Qwen2.5-0.5B-Instruct is a small instruction model with limited lexical range. Five greedy samples per topic estimate detector scores with lower variance than a single draw.
+**Generator capacity.** Qwen2.5-0.5B-Instruct is a small model. Greedy decoding with up to 300 new tokens yields repetitive academic Spanish. A long rubric in the evolved prompt mostly exceeds what 0.5B parameters can enforce in the surface text.
 
-**Detector bias.** Oculus logits on Qwen essays are skewed toward large positive values. Human rate stays near zero unless the distribution shifts across the logit $0$ threshold.
+**Detector bias.** Logits concentrate between $4$ and $10$ with median near $7.3$. Only 25 of $5580$ pooled scores fall below the logit $0$ threshold. Oculus behaves as a near-saturated AI detector on this generator regardless of prompt family.
 
-**Significance.** Mann–Whitney compares the full logit samples from baseline and evolved prompts. The $\chi^2$ test compares aggregate human classification rates over $2790$ binary outcomes per stage. Report both $p$-values when interpreting a rerun.
+**Evolution versus neutral evaluation.** Search used `prompts/initial_prompt.txt` with an explicit anti-AI line. Corpus scoring deliberately removed that line so baseline and evolved prompts are compared on detector evasion, not on the effect of a single “write like a human” instruction. Under that design, evolution did not produce a statistically significant shift in logits or human rate on 2790 samples per arm.
+
+**Interpretation.** The best prompt on 250 topics does not generalise to 558 topics with five stochastic repeats. Reported gains on the search set are within noise on the holdout corpus. A larger generator, domain calibration of Oculus, or decoding stochasticity are more plausible levers than further rubric growth in the system prompt.
 
 ## Logit distributions
 

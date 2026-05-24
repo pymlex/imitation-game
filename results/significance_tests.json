@@ -1,0 +1,24 @@
+{
+  "n_samples_baseline": 2790,
+  "n_samples_final": 2790,
+  "mannwhitney_u": 3882900.0,
+  "mannwhitney_pvalue": 0.8791360360768452,
+  "baseline_mean_logit": 6.939459704103008,
+  "final_mean_logit": 6.941221854058645,
+  "baseline_human_rate": 0.0035842293906810036,
+  "final_human_rate": 0.005376344086021506,
+  "baseline_n_human": 10,
+  "final_n_human": 15,
+  "chi2_statistic": 0.6428802880288029,
+  "chi2_pvalue": 0.42266972367682853,
+  "contingency_human_ai": [
+    [
+      10,
+      2780
+    ],
+    [
+      15,
+      2775
+    ]
+  ]
+}
