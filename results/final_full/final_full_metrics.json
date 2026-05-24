@@ -1,6 +1,11 @@
 {
-  "mean_logit": 6.915549344807116,
-  "reward": -6.915549344807116,
+  "n_topics": 558,
+  "reps_per_topic": 5,
+  "n_samples": 2790,
+  "mean_logit": 6.941221854058645,
+  "reward": -6.941221854058645,
   "frac_pred_human": 0.005376344086021506,
-  "frac_pred_ai": 0.9946236559139785
+  "frac_pred_ai": 0.9946236559139785,
+  "n_pred_human": 15,
+  "n_pred_ai": 2775
 }
