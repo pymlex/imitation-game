@@ -14,7 +14,7 @@ The detector returns a scalar logit $f(x) \in \mathbb{R}$. Higher values corresp
 
 $$R(p) = -\frac{1}{N} \sum_{i=1}^{N} f(x_i)$$
 
-During evolution $N = 250$ fixed topics from [pymlex/spanish-essay-topics](https://huggingface.co/datasets/pymlex/spanish-essay-topics). Baseline and final evaluation use all $N = 558$ topics in the train split.
+During evolution $N = 250$ fixed topics from [pymlex/spanish-essay-topics](https://huggingface.co/datasets/pymlex/spanish-essay-topics). Baseline and final evaluation use all $558$ topics with $K = 5$ independent generations per topic, $558 \times K = 2790$ detector scores per stage.
 
 ## Stack
 
@@ -110,7 +110,7 @@ Edit `env/evolution.env` and set `OPENAI_API_KEY`. Do not commit `env/*.env`. Te
 | --- | --- |
 | `env/generator.env` | `GENERATOR_MODEL_NAME`, `GENERATOR_PORT=8001`, `GENERATOR_BATCH_SIZE` |
 | `env/detector.env` | `DETECTOR_MODEL_NAME`, `DETECTOR_PORT=8002`, `DETECTOR_BATCH_SIZE` |
-| `env/evolution.env` | `OPENAI_API_KEY`, `GENERATOR_API_URL`, `DETECTOR_API_URL`, paths under `data/` and `results/` |
+| `env/evolution.env` | `OPENAI_API_KEY`, `GENERATOR_API_URL`, `DETECTOR_API_URL`, `EVAL_REPS_PER_TOPIC=5`, paths under `data/` and `results/` |
 
 ### 4. Topic splits
 
@@ -140,9 +140,9 @@ Wait until both health checks respond on `http://127.0.0.1:8001/health` and `htt
 
 All commands below assume the repository root as the current working directory and both APIs running.
 
-### Baseline on 558 topics
+### Baseline on 558 topics, 5 reps each
 
-Uses `initial_prompt.txt`:
+Uses `initial_prompt.txt`. Set `EVAL_REPS_PER_TOPIC=5` in `env/evolution.env`.
 
 ```bash
 python scripts/run_baseline_eval.py
@@ -150,8 +150,8 @@ python scripts/run_baseline_eval.py
 
 Outputs under `results/baseline_full/`:
 
-* `baseline_full_essays.csv`
-* `baseline_full_logits.json`
+* `baseline_full_essays.csv` with columns `topic`, `rep`, `essay`, `logit`, `pred_human`
+* `baseline_full_logits.json` with `n_samples = 2790`
 * `baseline_full_metrics.json`
 
 ### Prompt evolution on 250 topics
@@ -162,54 +162,57 @@ python scripts/run_evolution.py
 
 Best prompt path: `results/experiment/best_prompt_evolved.txt`. Summary: `results/experiment/evolution_summary.json`.
 
-### Final evaluation on 558 topics
+### Final evaluation on 558 topics, 5 reps each
 
 ```bash
 python scripts/run_final_eval.py
 ```
 
-Outputs under `results/final_full/` with the same naming pattern as the baseline stage.
+Outputs under `results/final_full/` with the same schema as baseline.
 
-### Logit distributions
+### Logit distributions and significance tests
 
 ```bash
 python scripts/plot_logit_distributions.py
+python scripts/analyze_eval_significance.py
 ```
 
-Writes `results/logit_distribution_full.png` and `results/logit_distribution_summary.csv`. Baseline and evolved histograms share the same axes.
+The histogram uses all $2790$ logits per stage: `results/logit_distribution_full.png`.
+
+Significance output: `results/significance_tests.json`
+
+* Mann–Whitney $U$ on pooled logits, two-sided, no normality assumption
+* $\chi^2$ test on the $2 \times 2$ table of human versus AI counts for baseline and evolved samples
 
 ## Results
 
-Full-corpus evaluation on RTX 5090 after OpenEvolve with `openai/gpt-oss-120b` mutations. Evolution log: `results/experiment/evolution_summary.json`, best fitness on 250 topics $R = -6.642$ at $\bar{\ell} = 6.642$, 125 evaluator calls, 200 iterations in the logged run in `results/evolution_metrics/eval_steps.jsonl`.
+Reported metrics refer to $558 \times 5 = 2790$ samples per stage after `run_baseline_eval.py` and `run_final_eval.py`.
 
-| Stage | Topics | $\bar{\ell}$ | $\sigma$ | median | $R=-\bar{\ell}$ | Predicted human |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline | 558 | 6.982 | 1.519 | 7.257 | −6.982 | 1 / 558 |
-| Evolved | 558 | 6.916 | 1.617 | 7.268 | −6.916 | 3 / 558 |
+| Stage | $n$ samples | $\bar{\ell}$ | $\sigma$ | Human rate | $n$ human |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 2790 | — | — | — | — |
+| Evolved | 2790 | — | — | — | — |
 
-Relative change of mean logit: $\Delta\bar{\ell} = -0.066$, about $0.95\%$ below baseline. Paired comparison on the same topic order: 279 topics improved, 279 worsened, exact balance on the mean shift.
+| Test | Statistic | $p$-value |
+| --- | ---: | ---: |
+| Mann–Whitney $U$ on logits | — | — |
+| $\chi^2$ on human vs AI counts | — | — |
 
-Detector rule: logit $\geq 0$ maps to AI. With $\bar{\ell} \approx 7$ the sigmoid probability is essentially saturated:
-
-$$P(\text{AI}\mid x) = \sigma(f(x)) \approx \sigma(7) \approx 0.999$$
+Fill the table from `results/*/metrics.json` and `results/significance_tests.json` after a full rerun.
 
 ## Analysis
 
-**Generator capacity.** Qwen2.5-0.5B-Instruct is a small instruction model. It has limited lexical and rhetorical range compared with the mutator and with the DeBERTa-large backbone inside Oculus. Essays stay short, template-like, and syntactically regular under greedy decoding. Style instructions in the system prompt only partially surface in the text because the weights underfit rich constraints.
+**Generator capacity.** Qwen2.5-0.5B-Instruct is a small instruction model with limited lexical range. Five greedy samples per topic estimate detector scores with lower variance than a single draw.
 
-**Detector bias.** Oculus was trained to flag machine-generated prose. Logits cluster between $4$ and $10$ with a mode near $7$. The histogram shows almost no mass below $0$. The classifier behaves as a near-certain AI detector on Qwen outputs regardless of prompt wording. Shifting $\bar{\ell}$ by $0.07$ nudges the density slightly left but does not move the bulk of the distribution across the decision boundary.
+**Detector bias.** Oculus logits on Qwen essays are skewed toward large positive values. Human rate stays near zero unless the distribution shifts across the logit $0$ threshold.
 
-**Evolution versus holdout.** Search on 250 topics found prompts with $\bar{\ell}$ down to about $6.625$ in individual evaluations and $6.642$ for the archived best prompt. Transfer to all 558 topics gives $\bar{\ell} = 6.916$, closer to the baseline full-corpus mean. The mutator expanded the prompt into a long rubric with numbered sections. That structure is typical of LLM-authored instructions and may not compress into reliable behaviour in a 0.5B generator.
-
-**Interpretation.** Prompt evolution under this stack is a weak lever. Gains are measurable in the mean but not in the classification rate. Three essays fall below the threshold after evolution against one at baseline. Further movement likely needs a larger generator, detector calibration on in-domain student writing, or decoding noise rather than prompt text alone.
+**Significance.** Mann–Whitney compares the full logit samples from baseline and evolved prompts. The $\chi^2$ test compares aggregate human classification rates over $2790$ binary outcomes per stage. Report both $p$-values when interpreting a rerun.
 
 ## Logit distributions
 
-Baseline and evolved densities on the same axes:
+![Logit distributions, 2790 samples per stage](results/logit_distribution_full.png)
 
-![Logit distributions on 558 topics](results/logit_distribution_full.png)
-
-Summary statistics: `results/logit_distribution_summary.csv`.
+Descriptive summary: `results/logit_distribution_summary.csv`.
 
 ## Prompts
 
@@ -260,7 +263,8 @@ imitation-game/
 │   ├── run_baseline_eval.py
 │   ├── run_evolution.py
 │   ├── run_final_eval.py
-│   └── plot_logit_distributions.py
+│   ├── plot_logit_distributions.py
+│   └── analyze_eval_significance.py
 ├── data/                     # topics JSON after prepare_topics
 └── results/                  # metrics, plots, evolved prompt
 ```

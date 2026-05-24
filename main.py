@@ -16,6 +16,7 @@ STEPS = [
     "python scripts/run_evolution.py",
     "python scripts/run_final_eval.py",
     "python scripts/plot_logit_distributions.py",
+    "python scripts/analyze_eval_significance.py",
 ]
 
 

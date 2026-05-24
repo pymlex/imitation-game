@@ -73,11 +73,13 @@ python detector_api.py
 
 ## Baseline on full dataset
 
+Set `EVAL_REPS_PER_TOPIC=5` in `env/evolution.env`.
+
 ```bash
 python scripts/run_baseline_eval.py
 ```
 
-Uses `prompts/initial_prompt.txt` on all 558 topics. Artefacts under `results/baseline_full/`.
+Uses `initial_prompt.txt`. Artefacts under `results/baseline_full/`.
 
 ## Prompt evolution
 
@@ -97,10 +99,11 @@ python scripts/run_final_eval.py
 
 Evaluates the evolved prompt on all 558 topics. Artefacts under `results/final_full/`.
 
-## Logit distributions
+## Logit distributions and tests
 
 ```bash
 python scripts/plot_logit_distributions.py
+python scripts/analyze_eval_significance.py
 ```
 
-Histogram of baseline vs evolved logits on shared axes: `results/logit_distribution_full.png`.
+Histogram: `results/logit_distribution_full.png`. Tests: `results/significance_tests.json`.
