@@ -6,9 +6,7 @@ from pathlib import Path
 
 STEPS = [
     "pip install -r requirements.txt",
-    "cp env/generator.env.example env/generator.env",
-    "cp env/detector.env.example env/detector.env",
-    "cp env/evolution.env.example env/evolution.env",
+    "edit env/evolution.env and set OPENAI_API_KEY",
     "python scripts/prepare_topics.py",
     "python generator_api.py",
     "python detector_api.py",

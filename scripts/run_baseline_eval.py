@@ -13,7 +13,7 @@ from pipeline_eval import run_full_dataset_eval
 if __name__ == "__main__":
     load_env_file("evolution")
     results_root = Path(require_env("RESULTS_DIR"))
-    prompt_path = Path("initial_prompt.txt")
+    prompt_path = Path(require_env("EVAL_BASELINE_PROMPT_PATH"))
     system_prompt = prompt_path.read_text(encoding="utf-8").strip()
 
     out_dir, metrics = run_full_dataset_eval(

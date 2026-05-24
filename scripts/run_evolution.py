@@ -49,7 +49,7 @@ if __name__ == "__main__":
     openevolve_dir.mkdir(parents=True, exist_ok=True)
     metrics_dir.mkdir(parents=True, exist_ok=True)
 
-    initial_src = Path("prompts/initial_prompt.txt")
+    initial_src = Path(require_env("EVOLUTION_INITIAL_PROMPT_PATH"))
     initial_dst = experiment_dir / "initial_prompt.txt"
     shutil.copy(initial_src, initial_dst)
 

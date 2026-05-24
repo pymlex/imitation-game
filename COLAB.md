@@ -40,17 +40,14 @@ Generator and detector stay resident in GPU memory. The evaluator only calls HTT
 pip install -r requirements.txt
 ```
 
+## Prompts
+
+* `prompts/initial_prompt.txt` — OpenEvolve seed, includes “no escribas como una IA”
+* `prompts/evaluation_no_ai.txt` — neutral wording for baseline and final corpus eval
+
 ## Environment files
 
-Copy templates and set secrets:
-
-```bash
-cp env/generator.env.example env/generator.env
-cp env/detector.env.example env/detector.env
-cp env/evolution.env.example env/evolution.env
-```
-
-Set `OPENAI_API_KEY` in `env/evolution.env` for [ZvenoAI](https://api.zveno.ai/v1).
+`env/*.env` are in the repository with `EVAL_REPS_PER_TOPIC=5`. Set `OPENAI_API_KEY` in `env/evolution.env` for [ZvenoAI](https://api.zveno.ai/v1).
 
 ## Topic splits
 
@@ -79,7 +76,7 @@ Set `EVAL_REPS_PER_TOPIC=5` in `env/evolution.env`.
 python scripts/run_baseline_eval.py
 ```
 
-Uses `initial_prompt.txt`. Artefacts under `results/baseline_full/`.
+Uses `prompts/evaluation_no_ai.txt`. Artefacts under `results/baseline_full/`.
 
 ## Prompt evolution
 
@@ -87,7 +84,7 @@ Uses `initial_prompt.txt`. Artefacts under `results/baseline_full/`.
 python scripts/run_evolution.py
 ```
 
-Each candidate prompt: 250 essays, batched generation and detection, fitness \(R(p)\). Island model: 5 islands, migration every 50 generations, rate 0.1. Mutations are small edits via the Zveno LLM template in `config/config_evolution.yaml`.
+Seed: `prompts/initial_prompt.txt`. Each candidate: 250 essays, fitness \(R(p)\).
 
 Best prompt: `results/experiment/best_prompt_evolved.txt`.
 

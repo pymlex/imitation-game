@@ -18,6 +18,9 @@ venv/
 !*.env.example
 env/*.env
 !env/*.env.example
+!env/evolution.env
+!env/generator.env
+!env/detector.env
 
 *.pt
 *.bin

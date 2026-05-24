@@ -16,6 +16,14 @@ $$R(p) = -\frac{1}{N} \sum_{i=1}^{N} f(x_i)$$
 
 During evolution $N = 250$ fixed topics from [pymlex/spanish-essay-topics](https://huggingface.co/datasets/pymlex/spanish-essay-topics). Baseline and final evaluation use all $558$ topics with $K = 5$ independent generations per topic, $558 \times K = 2790$ detector scores per stage.
 
+## Experimental design
+
+OpenEvolve starts from `prompts/initial_prompt.txt`, which explicitly asks the model not to write like an AI. That seed matches the first generation logged in `results/experiment/initial_prompt.txt`.
+
+Full-corpus scoring uses a different control prompt, `prompts/evaluation_no_ai.txt`, without any anti-AI instruction. The baseline stage measures Qwen under neutral wording. The final stage applies the evolved prompt from `results/experiment/best_prompt_evolved.txt` under the same neutral evaluation protocol.
+
+The question under test is whether prompt evolution shifts Oculus logits and human classification rate relative to that neutral baseline, not whether a hand-written “write like a human” line alone fools the detector.
+
 ## Stack
 
 | Component | Model or tool | Role |
@@ -98,19 +106,13 @@ pip install -r requirements.txt
 
 ### 3. Environment files
 
-```bash
-cp env/generator.env.example env/generator.env
-cp env/detector.env.example env/detector.env
-cp env/evolution.env.example env/evolution.env
-```
-
-Edit `env/evolution.env` and set `OPENAI_API_KEY`. Do not commit `env/*.env`. Templates `*.env.example` stay in the repository.
+The repository ships `env/generator.env`, `env/detector.env`, and `env/evolution.env` with defaults including `EVAL_REPS_PER_TOPIC=5`. After clone, set `OPENAI_API_KEY` in `env/evolution.env` only.
 
 | File | Main variables |
 | --- | --- |
-| `env/generator.env` | `GENERATOR_MODEL_NAME`, `GENERATOR_PORT=8001`, `GENERATOR_BATCH_SIZE` |
-| `env/detector.env` | `DETECTOR_MODEL_NAME`, `DETECTOR_PORT=8002`, `DETECTOR_BATCH_SIZE` |
-| `env/evolution.env` | `OPENAI_API_KEY`, `GENERATOR_API_URL`, `DETECTOR_API_URL`, `EVAL_REPS_PER_TOPIC=5`, paths under `data/` and `results/` |
+| `env/generator.env` | `GENERATOR_MODEL_NAME`, `GENERATOR_PORT=8001`, `GENERATOR_BATCH_SIZE=50` |
+| `env/detector.env` | `DETECTOR_MODEL_NAME`, `DETECTOR_PORT=8002`, `DETECTOR_BATCH_SIZE=125` |
+| `env/evolution.env` | `OPENAI_API_KEY`, `EVAL_REPS_PER_TOPIC`, `EVOLUTION_INITIAL_PROMPT_PATH`, `EVAL_BASELINE_PROMPT_PATH` |
 
 ### 4. Topic splits
 
@@ -142,7 +144,7 @@ All commands below assume the repository root as the current working directory a
 
 ### Baseline on 558 topics, 5 reps each
 
-Uses `initial_prompt.txt`. Set `EVAL_REPS_PER_TOPIC=5` in `env/evolution.env`.
+Uses `prompts/evaluation_no_ai.txt` via `EVAL_BASELINE_PROMPT_PATH`.
 
 ```bash
 python scripts/run_baseline_eval.py
@@ -155,6 +157,8 @@ Outputs under `results/baseline_full/`:
 * `baseline_full_metrics.json`
 
 ### Prompt evolution on 250 topics
+
+Starts from `prompts/initial_prompt.txt`.
 
 ```bash
 python scripts/run_evolution.py
@@ -216,10 +220,16 @@ Descriptive summary: `results/logit_distribution_summary.csv`.
 
 ## Prompts
 
-**Baseline** (`initial_prompt.txt`):
+**Evolution seed** (`prompts/initial_prompt.txt`):
 
 ```text
 Escribe un ensayo académico breve en español sobre el tema indicado. Escribe como un ser humano, no como una IA.
+```
+
+**Evaluation baseline** (`prompts/evaluation_no_ai.txt`):
+
+```text
+Escribe un ensayo académico breve en español sobre el tema indicado.
 ```
 
 **Evolved** (`results/experiment/best_prompt_evolved.txt`):
@@ -257,7 +267,9 @@ imitation-game/
 │   ├── generator.env.example
 │   ├── detector.env.example
 │   └── evolution.env.example
-├── initial_prompt.txt
+├── prompts/
+│   ├── initial_prompt.txt
+│   └── evaluation_no_ai.txt
 ├── scripts/
 │   ├── prepare_topics.py
 │   ├── run_baseline_eval.py
