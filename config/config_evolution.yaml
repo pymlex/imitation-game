@@ -1,4 +1,4 @@
-max_iterations: 50
+max_iterations: 200
 checkpoint_interval: 10
 log_level: INFO
 random_seed: 42
