@@ -1,5 +1,7 @@
 # Imitation Game
 
+imitation-game: OpenEvolve system-prompt search for Qwen Spanish literary essays with batched Oculus detector scoring and Zveno reasoning LLM mutations.
+
 ## Overview
 
 We evolve a system prompt $p$ for [Qwen/Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) so that generated Spanish essays on literary topics receive lower logits from [danibor/oculus-v2.0-multilingual](https://huggingface.co/danibor/oculus-v2.0-multilingual). Prompt mutations are proposed by [openai/gpt-oss-120b](https://api.zveno.ai/v1) through [OpenEvolve](https://github.com/algorithmicsuperintelligence/openevolve).
@@ -142,7 +144,7 @@ All commands below assume the repository root as the current working directory a
 
 ### Baseline on 558 topics
 
-Uses `prompts/initial_prompt.txt`:
+Uses `initial_prompt.txt`:
 
 ```bash
 python scripts/run_baseline_eval.py
@@ -180,14 +182,65 @@ Writes `results/logit_distribution_full.png` and `results/logit_distribution_sum
 
 ## Results
 
-Fill the evolved row after `run_final_eval.py`. Baseline numbers come from a completed run on RTX 5090.
+Full-corpus evaluation on RTX 5090 after OpenEvolve with `openai/gpt-oss-120b` mutations. Evolution log: `results/experiment/evolution_summary.json`, best fitness on 250 topics $R = -6.642$ at $\bar{\ell} = 6.642$, 125 evaluator calls, 200 iterations in the logged run in `results/evolution_metrics/eval_steps.jsonl`.
 
-| Stage | Topics | Mean logit $\bar{\ell}$ | $R = -\bar{\ell}$ | Fraction predicted human |
-| --- | ---: | ---: | ---: | ---: |
-| Baseline | 558 | 6.982 | −6.982 | 0.18% |
-| Evolved | 558 | — | — | — |
+| Stage | Topics | $\bar{\ell}$ | $\sigma$ | median | $R=-\bar{\ell}$ | Predicted human |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 558 | 6.982 | 1.519 | 7.257 | −6.982 | 1 / 558 |
+| Evolved | 558 | 6.916 | 1.617 | 7.268 | −6.916 | 3 / 558 |
 
-The detector threshold is logit $0$. Baseline essays are almost always classified as AI-generated.
+Relative change of mean logit: $\Delta\bar{\ell} = -0.066$, about $0.95\%$ below baseline. Paired comparison on the same topic order: 279 topics improved, 279 worsened, exact balance on the mean shift.
+
+Detector rule: logit $\geq 0$ maps to AI. With $\bar{\ell} \approx 7$ the sigmoid probability is essentially saturated:
+
+$$P(\text{AI}\mid x) = \sigma(f(x)) \approx \sigma(7) \approx 0.999$$
+
+## Analysis
+
+**Generator capacity.** Qwen2.5-0.5B-Instruct is a small instruction model. It has limited lexical and rhetorical range compared with the mutator and with the DeBERTa-large backbone inside Oculus. Essays stay short, template-like, and syntactically regular under greedy decoding. Style instructions in the system prompt only partially surface in the text because the weights underfit rich constraints.
+
+**Detector bias.** Oculus was trained to flag machine-generated prose. Logits cluster between $4$ and $10$ with a mode near $7$. The histogram shows almost no mass below $0$. The classifier behaves as a near-certain AI detector on Qwen outputs regardless of prompt wording. Shifting $\bar{\ell}$ by $0.07$ nudges the density slightly left but does not move the bulk of the distribution across the decision boundary.
+
+**Evolution versus holdout.** Search on 250 topics found prompts with $\bar{\ell}$ down to about $6.625$ in individual evaluations and $6.642$ for the archived best prompt. Transfer to all 558 topics gives $\bar{\ell} = 6.916$, closer to the baseline full-corpus mean. The mutator expanded the prompt into a long rubric with numbered sections. That structure is typical of LLM-authored instructions and may not compress into reliable behaviour in a 0.5B generator.
+
+**Interpretation.** Prompt evolution under this stack is a weak lever. Gains are measurable in the mean but not in the classification rate. Three essays fall below the threshold after evolution against one at baseline. Further movement likely needs a larger generator, detector calibration on in-domain student writing, or decoding noise rather than prompt text alone.
+
+## Logit distributions
+
+Baseline and evolved densities on the same axes:
+
+![Logit distributions on 558 topics](results/logit_distribution_full.png)
+
+Summary statistics: `results/logit_distribution_summary.csv`.
+
+## Prompts
+
+**Baseline** (`initial_prompt.txt`):
+
+```text
+Escribe un ensayo académico breve en español sobre el tema indicado. Escribe como un ser humano, no como una IA.
+```
+
+**Evolved** (`results/experiment/best_prompt_evolved.txt`):
+
+```text
+# Ensayo breve (300‑500 palabras)
+# Entrada: una línea con el tema.
+# Salida: texto continuo sin metadatos.
+
+Genera un ensayo en español que cumpla:
+
+1. Extensión: 300‑500 palabras.
+2. Estructura:
+   - Introducción (1‑2 párrafos) con tesis clara.
+   - Desarrollo (2‑3 párrafos) con al menos dos argumentos; cada argumento con ejemplo o dato breve.
+   - Conclusión (1 párrafo) que sintetice y aporte reflexión.
+3. Estilo formal, vocabulario preciso, conectores lógicos y matices subjetivos (“Resulta evidente que…”, “A mi juicio…”). No mencionar IA ni procesos de generación.
+4. Cohesión: cada párrafo contiene una idea central y se enlaza con el anterior; tiempo verbal y persona consistentes.
+5. Formato: párrafos separados por una línea en blanco, sin encabezados, listas ni viñetas.
+
+Devuelve únicamente el ensayo generado, sin metadatos ni explicaciones adicionales.
+```
 
 ## Project layout
 
@@ -203,8 +256,7 @@ imitation-game/
 │   ├── generator.env.example
 │   ├── detector.env.example
 │   └── evolution.env.example
-├── prompts/
-│   └── initial_prompt.txt
+├── initial_prompt.txt
 ├── scripts/
 │   ├── prepare_topics.py
 │   ├── run_baseline_eval.py
