@@ -1,12 +1,8 @@
 # Imitation Game
 
-imitation-game: OpenEvolve system-prompt search for Qwen Spanish literary essays with batched Oculus detector scoring and Zveno reasoning LLM mutations.
-
 ## Overview
 
-We evolve a system prompt $p$ for [Qwen/Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) so that generated Spanish essays on literary topics receive lower logits from [danibor/oculus-v2.0-multilingual](https://huggingface.co/danibor/oculus-v2.0-multilingual). Prompt mutations are proposed by [openai/gpt-oss-120b](https://api.zveno.ai/v1) through [OpenEvolve](https://github.com/algorithmicsuperintelligence/openevolve). Qwen and Oculus run as local FastAPI services on GPU and stay loaded for the full experiment.
-
-Repository: [pymlex/imitation-game](https://github.com/pymlex/imitation-game)
+We evolve a system prompt $p$ for [Qwen/Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) so that generated Spanish essays on literary topics receive lower logits from [danibor/oculus-v2.0-multilingual](https://huggingface.co/danibor/oculus-v2.0-multilingual). Prompt mutations are proposed by [openai/gpt-oss-120b](https://api.zveno.ai/v1) through [OpenEvolve](https://github.com/algorithmicsuperintelligence/openevolve).
 
 ## Objective
 
